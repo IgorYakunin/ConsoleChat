@@ -4,13 +4,13 @@
 #include <stdexcept>
 
 std::shared_ptr<User> Chat::find_user(const std::string& str, ID id) const
-{
+{//поиск зарегистрированного пользователя по логину или по нику
 	std::vector<User>::const_iterator iter;
 	if (id == ID::Login) {
 		iter = std::find_if(users_.cbegin(), users_.cend(),
 			[str](const User& user) { return user.login() == str; });
 	}
-	else {
+	else {//если ID::Nickname
 		iter = std::find_if(users_.cbegin(), users_.cend(),
 			[str](const User& user) { return user.nickname() == str; });
 	}

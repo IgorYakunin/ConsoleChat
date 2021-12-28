@@ -8,24 +8,26 @@
 using std::cout; using std::cin; using std::endl; using std::cerr;
 
 void Menu::display() const
-{
+{//показ вариантов выбора
 	cout << '\n';
 	for (const auto& line : operations_) {
 		cout << line.key << ": " << line.description << endl;
 	}
 	cout << "\nEnter your choice: ";
 }
-char get_choice(std::istream& is)
-{
+char get_choice()
+{//вспомогательная утилита для чтения в меню с защитой от случайных ошибок ввода
 	char ch;
-	is >> ch;
-	is.clear();
-	is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	cin >> ch;
+
+	cin.clear();
+	cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
 	return ch;
 }
 void write_text(std::string& text)
-{
-	cout << "Type you message: ";
+{//вспомогательная утилита для чтения многострочного сообщения
+	cout << "Type your message (Enter and Ctrl+Z to send): ";
 	std::string line;
 	while (cin) {
 		getline(cin, line, '\n');
@@ -40,11 +42,11 @@ Start_menu::Start_menu(std::shared_ptr<Chat> chat) : chat_{ chat }
 	operations_.push_back(Line{ '2', "Sign up" });
 }
 void Start_menu::process()
-{
+{//обработка ввода в стартовом меню
 	bool restart = true;
 	do {
 		display();
-		char choice{ get_choice(cin) };
+		char choice{ get_choice() };
 		switch (choice) {
 		case '0':
 			exit();
@@ -73,22 +75,22 @@ void Start_menu::process()
 	} while (restart);
 }
 void Start_menu::exit()
-{
+{//выход
 	chat_->close();
 }
 void Start_menu::login()
-{
+{//заолняем входную форму
 	Login_form login_form{ chat_ };
 	auto user{ login_form.input() };
-
+//если все проходит успешно, вызываем пользовательское меню
 	User_menu user_menu{ chat_, *user };
-
+//читаем и пишем сообщения пока не надоест
 	while (user_menu.is_open()) {
 		user_menu.process();
 	}
 }
 void Start_menu::sign_up()
-{
+{//вызов регистрационной формы для заполнения
 	Sign_up_form sign_up_form{ chat_ };
 	sign_up_form.input();
 }
@@ -100,11 +102,11 @@ User_menu::User_menu(std::shared_ptr<Chat> chat, const User& user)
 	operations_.push_back(Line{ '2', "Send message" });
 }
 void User_menu::process()
-{
+{//обработка пользовательского выбора
 	bool restart = true;
 	do {
 		display();
-		char choice{ get_choice(cin) };
+		char choice{ get_choice() };
 		switch (choice) {
 		case '0':
 			logout();
@@ -122,19 +124,24 @@ void User_menu::process()
 	} while (restart);
 }
 void User_menu::logout()
-{
+{//выход из пользовательского меню
 	user_.release();
 }
 void User_menu::view_chat()
-{
-	cout << "\nAll messages for you up to now:\n";
+{//просмотр полученных сообщений
+	cout << "\nHere are messages for you up to now:\n";
 	for (const auto& message : chat_->get_message()) {
-		if (message.to() == user_->nickname() or message.to() == "ALL")
+		if (message.to() == user_->nickname()
+			or (message.to() == "ALL" and message.from() != user_->nickname())) {
 			cout << "from: " << message.from() << " ~ " << message.text() << '\n';
+		}
+		else if (message.from() == user_->nickname()) {
+			cout << "\tto: " << message.to() << " ~ " << message.text() << '\n';
+		}
 	}
 }
 void User_menu::send_message()
-{
+{//запись сообщения
 	Message_form message_form{ chat_ };
 	auto user{ message_form.input() };
 
