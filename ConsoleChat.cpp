@@ -1,14 +1,15 @@
 #include "Chat.h"
 #include "Menu.h"
+#include "Form.h"
 
 int main()
 {
 	std::shared_ptr<Chat> chat{ new Chat };
 
-	Start_menu menu{ chat };
+	Menu main_menu{ menu_construction(chat) };
 
 	while (chat->is_open()) {
-		menu.process();
+		main_menu.input_processing();
 	}
 
 	return 0;

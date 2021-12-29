@@ -4,7 +4,7 @@
 class Message
 {
 public:
-	Message(const std::string& to, const std::string& from, const std::string& text)
+	explicit Message(const std::string& to, const std::string& from, const std::string& text)
 		: to_{ to }, from_{ from }, text_{ text } {}
 	const std::string& to()   const noexcept { return to_; }
 	const std::string& from() const noexcept { return from_; }
